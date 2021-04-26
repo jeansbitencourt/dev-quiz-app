@@ -1,14 +1,22 @@
+import 'package:flutter/material.dart';
+
 import 'package:devquiz/challenge/challenge_controller.dart';
 import 'package:devquiz/challenge/widgets/next_button/next_button_widget.dart';
 import 'package:devquiz/challenge/widgets/quiz/quiz_widget.dart';
+import 'package:devquiz/result/result_page.dart';
 import 'package:devquiz/shared/models/question_model.dart';
-import 'package:flutter/material.dart';
+
 import 'widgets/question_indicator/question_indicator_widget.dart';
 
 class ChallengePage extends StatefulWidget {
   final List<QuestionModel> questions;
+  final String title;
 
-  const ChallengePage({Key? key, required this.questions}) : super(key: key);
+  const ChallengePage({
+    Key? key,
+    required this.questions,
+    required this.title,
+  }) : super(key: key);
 
   @override
   _ChallengePageState createState() => _ChallengePageState();
@@ -32,6 +40,13 @@ class _ChallengePageState extends State<ChallengePage> {
         duration: Duration(milliseconds: 500),
         curve: Curves.linear,
       );
+  }
+
+  void onSelected(bool value) {
+    if (value) {
+      controller.qtdAnswerRight++;
+    }
+    nextPage();
   }
 
   @override
@@ -68,7 +83,7 @@ class _ChallengePageState extends State<ChallengePage> {
             .map(
               (e) => QuizWidget(
                 question: e,
-                onChange: nextPage,
+                onSelected: onSelected,
               ),
             )
             .toList(),
@@ -78,34 +93,40 @@ class _ChallengePageState extends State<ChallengePage> {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 20,
+            vertical: 20,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              ValueListenableBuilder<int>(
-                  valueListenable: controller.currentPageNotifier,
-                  builder: (context, value, _) => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          if (value < widget.questions.length)
-                            Expanded(
-                              child: NextButtonWidget.white(
-                                label: "Pular",
-                                onTap: nextPage,
-                              ),
+          child: ValueListenableBuilder<int>(
+            valueListenable: controller.currentPageNotifier,
+            builder: (context, value, _) => Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                if (value < widget.questions.length)
+                  Expanded(
+                    child: NextButtonWidget.white(
+                      label: "Pular",
+                      onTap: nextPage,
+                    ),
+                  ),
+                if (value == widget.questions.length)
+                  Expanded(
+                    child: NextButtonWidget.green(
+                      label: "Confirmar",
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ResultPage(
+                              title: widget.title,
+                              length: widget.questions.length,
+                              result: controller.qtdAnswerRight,
                             ),
-                          if (value == widget.questions.length)
-                            Expanded(
-                              child: NextButtonWidget.green(
-                                label: "Confirmar",
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                        ],
-                      ))
-            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

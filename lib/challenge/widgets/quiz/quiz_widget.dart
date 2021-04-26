@@ -7,12 +7,12 @@ import 'package:devquiz/shared/models/question_model.dart';
 
 class QuizWidget extends StatefulWidget {
   final QuestionModel question;
-  final VoidCallback onChange;
+  final ValueChanged<bool> onSelected;
 
   const QuizWidget({
     Key? key,
     required this.question,
-    required this.onChange,
+    required this.onSelected,
   }) : super();
 
   @override
@@ -32,9 +32,12 @@ class _QuizWidgetState extends State<QuizWidget> {
           SizedBox(
             height: 64,
           ),
-          Text(
-            widget.question.title,
-            style: AppTextStyles.heading,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              widget.question.title,
+              style: AppTextStyles.heading,
+            ),
           ),
           SizedBox(
             height: 24,
@@ -44,12 +47,12 @@ class _QuizWidgetState extends State<QuizWidget> {
               anser: answer(i),
               disabled: indexSelected != -1,
               isSelected: indexSelected == i,
-              onTap: () {
+              onTap: (value) {
                 setState(() {
                   indexSelected = i;
                 });
                 Future.delayed(Duration(seconds: 1))
-                    .then((value) => widget.onChange);
+                    .then((_) => widget.onSelected(value));
               },
             ),
         ],
